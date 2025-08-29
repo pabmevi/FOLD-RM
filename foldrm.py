@@ -16,14 +16,7 @@ class Classifier:
         self.simple = None
         self.translation = None
 
-def confidence_fit(self, data, improvement_threshold=0.05, ratio=0.5, min_confidence=0.75):
-        """
-        Entrena el modelo y calcula la confianza de las reglas.
-        - data: dataset
-        - improvement_threshold: umbral para mejora (si usas expand_rules)
-        - ratio: proporción de data para entrenamiento
-        - min_confidence: confianza mínima para conservar la regla
-        """
+    def confidence_fit(self, data, improvement_threshold=0.05, ratio=0.5, min_confidence=0.75):
         # 1️⃣ Entrenar usando foldrm o expand_rules según corresponda
         if self.rules is None or len(self.rules) == 0:
             self.rules = foldrm(data, ratio=ratio)
