@@ -1,6 +1,6 @@
 import numpy as np
 from foldrm import Classifier
-from foldrm import confidence_fit
+
 def Imput_lessnoise_allsp_rates():
     attrs = ["AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
              "SocialGrpSize","Diet_Invertebrates", "Diet_Vertebrates.ectotherms", "Diet_Scavenger", 
@@ -17,7 +17,7 @@ def Imput_lessnoise_allsp_rates():
 model, data = Imput_lessnoise_allsp_rates()
 # Entrenar el modelo usando toda la data y el parámetro ratio
 model.fit(data, ratio=0.9)
-
+model.confidence_fit(data)
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
