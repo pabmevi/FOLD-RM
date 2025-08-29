@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "/home/pabmevi/CONFOLD")
+
 import numpy as np
 from foldrm import Classifier
 
@@ -10,7 +13,7 @@ def Imput_lessnoise_allsp_rates():
     nums = ["Frequency_month","Survey_interval_days","Road_length_km","Survey_period_days","Latitude","Longitude","AdultBodyMass_g_median",
             "Home_range_Km2","longevity_y","Ageofmaturity_d","Litter_clutch_size","Litters_or_clutches_per_y","Diet_breadth","Habitat_breadth","Population.density_IndKm2"]
     model = Classifier(attrs=attrs, numeric=nums, label='risk_category')
-    data = model.load_data('data/roadkill/Imput_lessnoise_allsp_rates_classified.csv')
+    data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/roadkill/Imput_lessnoise_allsp_rates_classified.csv')
     print('\n% roadkill dataset', np.shape(data))
     return model, data
 
@@ -20,6 +23,7 @@ model, data = Imput_lessnoise_allsp_rates()
 # Entrenar el modelo usando toda la data y el parámetro ratio
 # NOTA: Pasamos toda la data, no se separa X e Y
 model.fit(data, ratio=0.9)
+model.confidence_fit(data, improvement_threshold=0.9)
 
 # Imprimir reglas aprendidas como Answer Set Program
 print("\nLearned Answer Set Program rules:\n")
