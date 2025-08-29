@@ -16,6 +16,32 @@ class Classifier:
         self.simple = None
         self.translation = None
 
+def confidence_fit(self, data, improvement_threshold=0.05, ratio=0.5, min_confidence=0.75):
+        """
+        Entrena el modelo y calcula la confianza de las reglas.
+        - data: dataset
+        - improvement_threshold: umbral para mejora (si usas expand_rules)
+        - ratio: proporción de data para entrenamiento
+        - min_confidence: confianza mínima para conservar la regla
+        """
+        # 1️⃣ Entrenar usando foldrm o expand_rules según corresponda
+        if self.rules is None or len(self.rules) == 0:
+            self.rules = foldrm(data, ratio=ratio)
+        else:
+            self.rules = expand_rules(data, existing_rules=self.rules, ratio=ratio, improvement_threshold=improvement_threshold)
+
+        # 2️⃣ Calcular confianza para cada regla
+        new_rules = []
+        for rule in self.rules:
+            # Supongamos que el número de aciertos (tp) y total están guardados en la regla
+            tp = rule[-2] if len(rule) >= 2 else 0
+            total = rule[-3] if len(rule) >= 3 else 1
+            conf = calculate_confidence(tp, total)
+            new_rules.append(rule + (conf,))
+
+        # 3️⃣ Podar reglas con confianza menor que min_confidence
+        self.rules = prune_rules(new_rules, confidence=min_confidence)
+
     def load_data(self, file, amount=-1):
         if self.label != self.attrs[-1]:
             data, self.attrs = load_data(file, self.attrs, self.label, self.numeric, amount)
