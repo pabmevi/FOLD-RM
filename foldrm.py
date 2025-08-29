@@ -1,5 +1,5 @@
 from utils import load_data, split_data, get_scores, justify_data, decode_rules, proof_tree, scores, zip_rule, simplify_rule
-from algo import foldrm, predict, classify, flatten_rules, justify, add_constraint
+from algo import foldrm, predict, classify, flatten_rules, justify, add_constraint, confidence_foldrm, learn_confidence_rule, confidence_fold, expand_rules, add_rule 
 import pickle
 
 
@@ -16,21 +16,6 @@ class Classifier:
         self.simple = None
         self.translation = None
 
-    def confidence_fit(self, data, improvement_threshold=0.05, ratio=0.5, min_confidence=0.75):
-        if self.rules is None or len(self.rules) == 0:
-            self.rules = foldrm(data, ratio=ratio)
-        else:
-            self.rules = expand_rules(data, existing_rules=self.rules, ratio=ratio, improvement_threshold=improvement_threshold)
-
-        new_rules = []
-        for rule in self.rules:
-            tp = rule[-2] if len(rule) >= 2 else 0
-            total = rule[-3] if len(rule) >= 3 else 1
-            conf = calculate_confidence(tp, total)
-            new_rules.append(rule + (conf,))
-
-        self.rules = prune_rules(new_rules, confidence=min_confidence)
-
     def load_data(self, file, amount=-1):
         if self.label != self.attrs[-1]:
             data, self.attrs = load_data(file, self.attrs, self.label, self.numeric, amount)
@@ -38,51 +23,86 @@ class Classifier:
             data, _ = load_data(file, self.attrs[:-1], self.label, self.numeric, amount)
         return data
 
+    def add_manual_rule(self, rule, attrs, nums, labels, instructions=True, FOLD_Syntax = False):
+        if self.rules == None:
+            self.rules = []
+        if instructions:
+            print(f"\#\#\#\#\# Instructions \#\#\#\#\#")
+            print(f"Manually defined rules should take the following form: \n (with confidence \#) class = 'label' if 'attribute name/index' 'symbol' 'value' ")
+            print(f"You can then include additional conditions using 'except if', 'and' or 'or'.")
+            print(f"If you wish to use FOLD_Syntax which is useful for people who know it or for copying and pasting rules set FOLD_Syntax = True.")
+            print(f"Example Rule 1: with confidence 0.99  class = '0.5' if 'correct_number' '>=' '1' and 'incorrect_unit' '>=' '1' or 'correct_unit' '<=' '0'")
+            print(f"Example Rule 2: class = '1' if 'correct_number' '>=' '1' and 'correct_unit' '>=' '1'")
+        if FOLD_Syntax:
+            self.rules.append(rule)
+            print(f"The following rule has been added to the model: {rule}")
+        else:
+            manual_rules = add_rule(rule, attrs, nums, labels)
+            self.rules = self.rules + manual_rules
+
     def fit(self, data, ratio=0.5):
-        self.rules = foldrm(data, ratio=ratio)
+        if self.rules == None:
+            self.rules = foldrm(data, ratio=ratio)
+        elif isinstance(self.rules, list) and len(self.rules)  == 0:
+            self.rules = foldrm(data, ratio=ratio)
+        else:
+            self.rules = expand_rules(data, existing_rules = self.rules, ratio=ratio)            
+
+    def confidence_fit(self, data, improvement_threshold=0.02, ratio=0.5):
+        if self.rules == None:
+            self.rules = confidence_foldrm(data, improvement_threshold=improvement_threshold)
+        elif isinstance(self.rules, list) and len(self.rules)  == 0:
+            self.rules = confidence_foldrm(data, improvement_threshold=improvement_threshold)
+        else:
+            self.rules = expand_rules(data, existing_rules = self.rules, ratio = 0.5, improvement_threshold = improvement_threshold)
 
     def predict(self, X):
-        return predict(self.rules, X)
+        predictions_with_confidence = predict(self.rules, X)
+        return predictions_with_confidence
 
     def classify(self, x):
         return classify(self.rules, x)
-
+    
     def asp(self, simple=False):
         if (self.asp_rules is None and self.rules is not None) or self.simple != simple:
             self.simple = simple
             self.frs = flatten_rules(self.rules)
+            self.frs = self.frs if self.frs is not None else []
             self.frs = [zip_rule(r) for r in self.frs]
             if simple:
                 self.asp_rules = decode_rules(self.frs, self.attrs)
-                self.asp_rules = [simplify_rule(r) for r in self.asp_rules]
             else:
                 self.crs = add_constraint(self.frs)
                 self.asp_rules = decode_rules(self.crs, self.attrs)
+    
+            self.asp_rules = self.asp_rules if self.asp_rules is not None else []
             self.crs = self.frs
-        return self.asp_rules
+    
+        return self.asp_rules if self.asp_rules is not None else []
 
     def print_asp(self, simple=False):
-        for r in self.asp(simple):
+        asp_rules_to_print = self.asp(simple=simple)
+        for r in asp_rules_to_print:
             print(r)
 
     def explain(self, x):
         ret = ''
         pos = []
-        justify(self.crs, x, pos=pos)
-        expl = decode_rules(pos, self.attrs, x=x)
-        for e in expl:
-            ret = ret + e + '\n'
-        ret = ret + str(justify_data(pos, x, attrs=self.attrs)) + '\n'
+        justify(self.crs, x, pos=pos)  # Assuming justify fills pos with applicable rules
+        expl = decode_rules(pos, self.attrs, x=x)  # Decode rules to human-readable format
+        for r, e in zip(pos, expl):  # Assume pos and expl are parallel arrays
+            confidence = r[-1]  # Extract confidence value
+            ret += f"{e} with confidence {confidence}\n"  # Append confidence to explanation
         return ret
-
+    
     def proof(self, x):
         ret = ''
         pos = []
-        justify(self.crs, x, pos=pos)
-        expl = proof_tree(pos, self.attrs, x=x)
-        for e in expl:
-            ret = ret + e + '\n'
-        ret = ret + str(justify_data(pos, x, attrs=self.attrs)) + '\n'
+        justify(self.crs, x, pos=pos)  # Assuming justify fills pos with applicable rules
+        expl = proof_tree(pos, self.attrs, x=x)  # Generate a proof tree, similar logic to explain
+        for r, e in zip(pos, expl):  # Assume pos and expl are parallel arrays
+            confidence = r[-1]  # Extract confidence value
+            ret += f"{e} with confidence {confidence}\n"  # Append confidence to proof
         return ret
 
 
