@@ -19,7 +19,7 @@ def Imput_lessnoise_allsp_rates():
     return model, data
 model, data = Imput_lessnoise_allsp_rates()
 # Entrenar el modelo usando toda la data y el parámetro ratio
-model.fit(data, ratio=0.9)
+model.fit(data, ratio=0.7)
 model.confidence_fit(data, improvement_threshold=0.9)
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
@@ -27,7 +27,4 @@ model.print_asp()
 Y_pred = model.predict(data)
 print("\nEjemplo de predicciones (primeros 10):", Y_pred[:10])
 
-print("\nExplicación para el primer ejemplo:\n")
-model.explain(data[0])
-model.print_asp()
 

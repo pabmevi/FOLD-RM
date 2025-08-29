@@ -17,23 +17,14 @@ def Imput_lessnoise_allsp_rates():
     print('\n% roadkill dataset', np.shape(data))
     return model, data
 
-# Cargar modelo y datos
 model, data = Imput_lessnoise_allsp_rates()
 
-# Entrenar el modelo usando toda la data y el parámetro ratio
-# NOTA: Pasamos toda la data, no se separa X e Y
 model.fit(data, ratio=0.9)
 model.confidence_fit(data, improvement_threshold=0.9)
 
-# Imprimir reglas aprendidas como Answer Set Program
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
-# Ejemplo de predicción usando toda la data
-Y_pred = model.predict(data)
-print("\nEjemplo de predicciones (primeros 10):", Y_pred[:10])
 
-# Ejemplo de explicación para el primer ejemplo
-print("\nExplicación para el primer ejemplo:\n")
-model.explain(data[0])
-model.print_asp()
+Y_pred = model.predict(data)
+
