@@ -26,5 +26,3 @@ print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
 
-Y_pred = model.predict(data)
-
