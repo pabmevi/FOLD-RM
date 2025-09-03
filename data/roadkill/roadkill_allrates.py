@@ -20,7 +20,7 @@ def Imput_lessnoise_allsp_rates():
 model, data = Imput_lessnoise_allsp_rates()
 
 model.fit(data, ratio=0.7)
-model.confidence_fit(data, improvement_threshold=0.9)
+model.confidence_fit(data, improvement_threshold=0.7)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
