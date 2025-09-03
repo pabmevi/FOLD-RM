@@ -3,6 +3,9 @@ sys.path.insert(0, "/home/pabmevi/CONFOLD")
 
 import numpy as np
 from foldrm import Classifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import pandas as pd
 
 def Imput_lessnoise_allsp_rates():
     attrs = ["Frequency_month","Survey_interval_days","Road_length_km","Survey_period_days","Latitude","Longitude",
