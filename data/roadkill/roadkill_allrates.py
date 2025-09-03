@@ -61,7 +61,7 @@ print("\nReporte de clasificación:")
 print(classification_report(true_classes, pred_classes, labels=labels))
 
 # Accuracy de predicciones de alta confianza (>= 0.8)
-high_conf_preds = [(pred, true) for (pred, conf), true in zip(Y_pred, true_classes) if conf >= 0.8]
+high_conf_preds = [(pred, true) for (pred, conf), true in zip(Y_pred, true_classes) if conf >= 0.7]
 if high_conf_preds:
     accuracy_high_conf = sum(1 for (pred, true) in high_conf_preds if pred == true) / len(high_conf_preds)
     print("\nAccuracy para predicciones con confianza >= 0.8:", accuracy_high_conf)
