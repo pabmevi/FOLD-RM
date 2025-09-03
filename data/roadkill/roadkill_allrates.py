@@ -18,6 +18,7 @@ def Imput_lessnoise_allsp_rates():
     return model, data
 
 model, data = Imput_lessnoise_allsp_rates()
+train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
 model.fit(data, ratio=0.7)
 model.confidence_fit(data, improvement_threshold=0.9)
@@ -25,4 +26,42 @@ model.confidence_fit(data, improvement_threshold=0.9)
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
+# ===========================
+# Predicciones sobre test_data
+# ===========================
+Y_pred = model.predict(test_data)
+
+print("\nEjemplo de predicciones (primeros 10):")
+for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
+    print(f"Obs {i+1}: pred = {pred}, entrada = {obs}")
+
+# ===========================
+# Evaluación del modelo
+# ===========================
+# Extraer clases predichas y etiquetas reales
+pred_classes = [p[0] for p in Y_pred]
+true_classes = [row[-1] for row in test_data]
+
+# Accuracy general
+acc = accuracy_score(true_classes, pred_classes)
+print("\nAccuracy general:", acc)
+
+# Matriz de confusión
+labels = ['low', 'medium', 'high']
+cm = confusion_matrix(true_classes, pred_classes, labels=labels)
+df_cm = pd.DataFrame(cm, index=labels, columns=labels)
+print("\nMatriz de confusión:")
+print(df_cm)
+
+# Reporte de precisión, recall y f1-score
+print("\nReporte de clasificación:")
+print(classification_report(true_classes, pred_classes, labels=labels))
+
+# Accuracy de predicciones de alta confianza (>= 0.8)
+high_conf_preds = [(pred, true) for (pred, conf), true in zip(Y_pred, true_classes) if conf >= 0.8]
+if high_conf_preds:
+    accuracy_high_conf = sum(1 for (pred, true) in high_conf_preds if pred == true) / len(high_conf_preds)
+    print("\nAccuracy para predicciones con confianza >= 0.8:", accuracy_high_conf)
+else:
+    print("\nNo hay predicciones con confianza >= 0.8")
 
