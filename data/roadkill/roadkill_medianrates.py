@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import pandas as pd
 
 def Imput_lessnoise_allsp_rates():
-    attrs = ["AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
+    attrs = ["IUCN_name", "AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
              "SocialGrpSize","Diet_Invertebrates", "Diet_Vertebrates.ectotherms", "Diet_Scavenger", 
              "Diet_Seed","Diet_Plant", "Activity_1Diurnal_2Nocturnal", "Litter_clutch_size",
              "Litters_or_clutches_per_y","Diet_breadth", "Artificial", "Cropland", "Grassland",
