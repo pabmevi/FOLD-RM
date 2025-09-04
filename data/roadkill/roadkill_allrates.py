@@ -1,4 +1,7 @@
 
+import pandas as pd
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
 import sys
 import random
 random.seed(42)
@@ -8,7 +11,7 @@ import numpy as np
 from foldrm import Classifier
 
 def Imput_lessnoise_allsp_rates():
-    attrs = ["IUCN_name", "Frequency_month","Survey_interval_days","Road_length_km","Survey_period_days","Latitude","Longitude","Country",
+    attrs = ["Frequency_month","Survey_interval_days","Road_length_km","Survey_period_days","Latitude","Longitude",
              "AdultBodyMass_g_median","Home_range_Km2","longevity_y","Ageofmaturity_d",
              "Diet_Invertebrates","Diet_Vertebrates.ectotherms","Diet_Scavenger","Diet_Seed","Diet_Plant","Activity_1Diurnal_2Nocturnal",
              "Litter_clutch_size","Litters_or_clutches_per_y","Diet_breadth","Artificial","Cropland","Grassland","Forest","Sparse.vegetation","Water.bodies",
@@ -21,44 +24,60 @@ def Imput_lessnoise_allsp_rates():
 
 model, data = Imput_lessnoise_allsp_rates()
 
-# Separar datos en entrenamiento y test (80% train, 20% test)
+# Separar datos en entrenamiento y test (80% train, 20% test) de forma reproducible
 from utils import split_data
 train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
-model.fit(train_data, ratio=0.75)
+model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
-# Calcular e imprimir accuracy solo sobre el set de test
-y_pred_raw = model.predict(test_data)
-y_pred = [p[0] if isinstance(p, tuple) else p for p in y_pred_raw]
-y_true = [row[-1] for row in test_data]
-accuracy = sum([y1 == y2 for y1, y2 in zip(y_pred, y_true)]) / len(y_true)
-print(f"\nAccuracy en test: {accuracy:.2%}")
+# ===========================
+# Evaluación del modelo
+# ===========================
+# Accuracy global (cuenta None como error)
+all_pred_classes = [p[0] if p is not None else None for p in Y_pred]
+all_true_classes = [row[-1] for row in test_data]
+acc_global = sum([y1 == y2 for y1, y2 in zip(all_pred_classes, all_true_classes)]) / len(all_true_classes)
+print("\nAccuracy global (incluyendo None como error):", acc_global)
 
-none_count = sum([p is None for p in y_pred])
-print(f"\nPredicciones None: {none_count} de {len(y_pred)}")
-from collections import Counter
-print("Distribución de clases predichas:", Counter([p for p in y_pred if p is not None]))
-print("Distribución de clases reales:", Counter(y_true))
+# Extraer clases predichas y etiquetas reales, filtrando None
+pred_classes = [p[0] for p in Y_pred if p is not None and p[0] is not None]
+true_classes = [row[-1] for p, row in zip(Y_pred, test_data) if p is not None and p[0] is not None]
 
-# Mostrar primeras predicciones y reales del set de test
-print("\nPrimeras 10 predicciones:", y_pred_raw[:10])
-print("Primeras 10 reales:     ", y_true[:10])
+# Accuracy general
+if pred_classes:
+    acc = accuracy_score(true_classes, pred_classes)
+    print("\nAccuracy general:", acc)
+else:
+    print("\nNo hay predicciones válidas para calcular accuracy.")
 
-# Matriz de confusión para el set de test
-labels = sorted(list(set([y for y in y_true + y_pred if y is not None])))
-conf_matrix = {label: {l:0 for l in labels} for label in labels}
-for yt, yp in zip(y_true, y_pred):
-    if yt in labels and yp in labels:
-        conf_matrix[yt][yp] += 1
-print("\nMatriz de confusión (test):")
-print("\t" + "\t".join(labels))
-for label in labels:
-    row = [str(conf_matrix[label][l]) for l in labels]
-    print(f"{label}\t" + "\t".join(row))
+# Matriz de confusión
+labels = ['low', 'medium', 'high']
+if pred_classes:
+    cm = confusion_matrix(true_classes, pred_classes, labels=labels)
+    df_cm = pd.DataFrame(cm, index=labels, columns=labels)
+    print("\nMatriz de confusión:")
+    print(df_cm)
+else:
+    print("\nNo hay predicciones válidas para matriz de confusión.")
+
+# Reporte de precisión, recall y f1-score
+if pred_classes:
+    print("\nReporte de clasificación:")
+    print(classification_report(true_classes, pred_classes, labels=labels))
+else:
+    print("\nNo hay predicciones válidas para reporte de clasificación.")
+
+# Accuracy de predicciones de alta confianza (>= 0.8)
+high_conf_preds = [(pred, row[-1]) for (pred, row) in zip(Y_pred, test_data) if pred is not None and pred[1] is not None and pred[1] >= 0.8]
+if high_conf_preds:
+    accuracy_high_conf = sum(1 for (pred, true) in high_conf_preds if pred[0] == true) / len(high_conf_preds)
+    print("\nAccuracy para predicciones con confianza >= 0.8:", accuracy_high_conf)
+else:
+    print("\nNo hay predicciones con confianza >= 0.8")
 
 

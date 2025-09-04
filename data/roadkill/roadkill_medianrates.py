@@ -3,12 +3,11 @@ sys.path.insert(0, "/home/pabmevi/CONFOLD")
 
 import numpy as np
 from foldrm import Classifier
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pandas as pd
 
 def Imput_lessnoise_allsp_rates():
-    attrs = ["IUCN_name", "AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
+    attrs = ["AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
              "SocialGrpSize","Diet_Invertebrates", "Diet_Vertebrates.ectotherms", "Diet_Scavenger", 
              "Diet_Seed","Diet_Plant", "Activity_1Diurnal_2Nocturnal", "Litter_clutch_size",
              "Litters_or_clutches_per_y","Diet_breadth", "Artificial", "Cropland", "Grassland",
@@ -27,7 +26,8 @@ def Imput_lessnoise_allsp_rates():
 # ===========================
 model, data = Imput_lessnoise_allsp_rates()
 
-train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
+from utils import split_data
+train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
 
 # ===========================
 # Entrenamiento
