@@ -23,7 +23,7 @@ model, data = Imput_lessnoise_allsp_rates()
 
 # Separar datos en entrenamiento y test (80% train, 20% test)
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
 model.fit(train_data, ratio=0.3)
@@ -38,6 +38,12 @@ y_pred = [p[0] if isinstance(p, tuple) else p for p in y_pred_raw]
 y_true = [row[-1] for row in test_data]
 accuracy = sum([y1 == y2 for y1, y2 in zip(y_pred, y_true)]) / len(y_true)
 print(f"\nAccuracy en test: {accuracy:.2%}")
+
+none_count = sum([p is None for p in y_pred])
+print(f"\nPredicciones None: {none_count} de {len(y_pred)}")
+from collections import Counter
+print("Distribución de clases predichas:", Counter([p for p in y_pred if p is not None]))
+print("Distribución de clases reales:", Counter(y_true))
 
 # Mostrar primeras predicciones y reales del set de test
 print("\nPrimeras 10 predicciones:", y_pred_raw[:10])
