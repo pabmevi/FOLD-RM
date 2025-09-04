@@ -26,7 +26,7 @@ from utils import split_data
 train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
-model.fit(train_data, ratio=0.7)
+model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
