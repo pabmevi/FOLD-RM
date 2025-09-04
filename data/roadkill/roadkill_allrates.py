@@ -23,10 +23,10 @@ model, data = Imput_lessnoise_allsp_rates()
 
 # Separar datos en entrenamiento y test (80% train, 20% test)
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
-model.fit(train_data, ratio=0.9)
+model.fit(train_data, ratio=0.8)
 model.confidence_fit(train_data, improvement_threshold=0.7)
 
 print("\nLearned Answer Set Program rules:\n")
