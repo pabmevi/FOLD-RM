@@ -19,18 +19,16 @@ def Imput_lessnoise_allsp_rates():
 
 model, data = Imput_lessnoise_allsp_rates()
 
-# Separar datos en entrenamiento y test (90% train, 10% test)
+# Separar datos en entrenamiento y test (80% train, 20% test)
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
-model.fit(train_data, ratio=0.9)
-model.confidence_fit(train_data, improvement_threshold=0.9)
-
+model.fit(train_data, ratio=0.7)
+model.confidence_fit(train_data, improvement_threshold=0.1)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
-
 
 # Calcular e imprimir accuracy solo sobre el set de test
 y_pred_raw = model.predict(test_data)
@@ -39,11 +37,9 @@ y_true = [row[-1] for row in test_data]
 accuracy = sum([y1 == y2 for y1, y2 in zip(y_pred, y_true)]) / len(y_true)
 print(f"\nAccuracy en test: {accuracy:.2%}")
 
-
 # Mostrar primeras predicciones y reales del set de test
 print("\nPrimeras 10 predicciones:", y_pred_raw[:10])
 print("Primeras 10 reales:     ", y_true[:10])
-
 
 # Matriz de confusión para el set de test
 labels = sorted(list(set([y for y in y_true + y_pred if y is not None])))
