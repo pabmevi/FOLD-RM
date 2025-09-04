@@ -141,6 +141,15 @@ def decode_rules(rules, attrs, x=None):
             if isinstance(v, str):
                 v = v.lower().replace(' ', '_')
                 v = 'null' if len(v) == 0 else '\'' + v + '\''
+            # Forzar Country como categórico siempre
+            if k == 'country':
+                if r == '==':
+                    return prefix + k + '(X,' + v + ')'
+                elif r == '!=':
+                    return 'not ' + not_prefix + k + '(X,' + v + ')'
+                else:
+                    # Si por error llega un operador numérico, lo mostramos como igualdad textual
+                    return prefix + k + '(X,' + v + ')'
             if r == '==':
                 return prefix + k + '(X,' + v + ')'
             elif r == '!=':
