@@ -23,12 +23,10 @@ model, data = Imput_lessnoise_allsp_rates()
 
 # Separar datos en entrenamiento y test (80% train, 20% test)
 from utils import split_data
-
-# Para diagnóstico: entrenar y predecir sobre todo el dataset
-train_data, test_data = data, data
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
-model.fit(train_data, ratio=0.3)
+model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.1)
 
 print("\nLearned Answer Set Program rules:\n")
