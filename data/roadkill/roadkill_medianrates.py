@@ -1,4 +1,6 @@
 import sys
+import random
+random.seed(42)
 sys.path.insert(0, "/home/pabmevi/CONFOLD")
 
 import numpy as np
@@ -27,12 +29,12 @@ def Imput_lessnoise_allsp_rates():
 model, data = Imput_lessnoise_allsp_rates()
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
 
 # ===========================
 # Entrenamiento
 # ===========================
-model.fit(train_data, ratio=0.7)
+model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
