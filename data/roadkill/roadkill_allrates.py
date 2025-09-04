@@ -19,9 +19,9 @@ def Imput_lessnoise_allsp_rates():
 
 model, data = Imput_lessnoise_allsp_rates()
 
-# Separar datos en entrenamiento y test (80% train, 20% test)
+# Separar datos en entrenamiento y test (90% train, 10% test)
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # Entrenar solo con el set de entrenamiento
 model.fit(train_data, ratio=0.9)
