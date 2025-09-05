@@ -52,9 +52,10 @@ for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
 # ===========================
 # Evaluación del modelo
 # ===========================
-# Extraer clases predichas y etiquetas reales
-pred_classes = [p[0] for p in Y_pred]
-true_classes = [row[-1] for row in test_data]
+
+# Extraer clases predichas y etiquetas reales, filtrando None
+pred_classes = [p[0] for p in Y_pred if p is not None and p[0] is not None]
+true_classes = [row[-1] for p, row in zip(Y_pred, test_data) if p is not None and p[0] is not None]
 
 # Accuracy general
 acc = accuracy_score(true_classes, pred_classes)
