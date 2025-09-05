@@ -34,8 +34,8 @@ train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
 # ===========================
 # Entrenamiento
 # ===========================
-model.fit(train_data, ratio=0.3)
-model.confidence_fit(train_data, improvement_threshold=0.1)
+model.fit(train_data, ratio=0.7)
+model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
