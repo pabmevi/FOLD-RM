@@ -75,19 +75,6 @@ if pred_classes:
 else:
     print("\nNo hay predicciones válidas para matriz de confusión.")
 
-# Reporte de precisión, recall y f1-score
-if pred_classes:
-    print("\nReporte de clasificación:")
-    print(classification_report(true_classes, pred_classes, labels=labels))
-else:
-    print("\nNo hay predicciones válidas para reporte de clasificación.")
 
-# Accuracy de predicciones de alta confianza (>= 0.7)
-high_conf_preds = [(pred, row[-1]) for (pred, row) in zip(Y_pred, test_data) if pred is not None and pred[1] is not None and pred[1] >= 0.7]
-if high_conf_preds:
-    accuracy_high_conf = sum(1 for (pred, true) in high_conf_preds if pred[0] == true) / len(high_conf_preds)
-    print("\nAccuracy para predicciones con confianza >= 0.7:", accuracy_high_conf)
-else:
-    print("\nNo hay predicciones con confianza >= 0.7")
 
 
