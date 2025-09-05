@@ -32,8 +32,18 @@ train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.9)
 
+
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
+
+# ===========================
+# Predicciones sobre test_data
+# ===========================
+Y_pred = model.predict(test_data)
+
+print("\nEjemplo de predicciones (primeros 10):")
+for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
+    print(f"Obs {i+1}: pred = {pred}, entrada = {obs}")
 
 # ===========================
 # Evaluación del modelo
