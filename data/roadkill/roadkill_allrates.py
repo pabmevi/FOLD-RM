@@ -65,6 +65,7 @@ if pred_classes:
 else:
     print("\nNo hay predicciones válidas para calcular accuracy.")
 
+
 # Matriz de confusión
 labels = ['low', 'medium', 'high']
 if pred_classes:
@@ -72,6 +73,25 @@ if pred_classes:
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
     print("\nMatriz de confusión:")
     print(df_cm)
+
+    # ===========================
+    # Inverse Brier Score
+    # ===========================
+    # Para cada ejemplo predicho, construimos el vector de probabilidades
+    # Usamos el confidence score de la predicción como probabilidad para la clase predicha, 0 para las demás
+    brier_scores = []
+    for (pred, conf), true in zip([p for p in Y_pred if p is not None and p[0] is not None], true_classes):
+        prob_vec = [0.0, 0.0, 0.0]
+        if pred in labels:
+            prob_vec[labels.index(pred)] = conf if conf is not None else 1.0
+        true_vec = [1.0 if l == true else 0.0 for l in labels]
+        brier_scores.append(sum((p-t)**2 for p, t in zip(prob_vec, true_vec)))
+    if brier_scores:
+        brier_score = sum(brier_scores) / len(brier_scores)
+        inverse_brier_score = 1 - brier_score
+        print(f"\nInverse Brier Score: {inverse_brier_score:.4f}")
+    else:
+        print("\nNo hay predicciones válidas para calcular Inverse Brier Score.")
 else:
     print("\nNo hay predicciones válidas para matriz de confusión.")
 
