@@ -8,7 +8,7 @@ from foldrm import Classifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pandas as pd
 
-def Imput_lessnoise_allsp_rates():
+def Imput_lessnoise_mediansp_rates():
     attrs = ["AdultBodyMass_g_median", "Home_range_Km2", "longevity_y", "Ageofmaturity_d", 
              "SocialGrpSize","Diet_Invertebrates", "Diet_Vertebrates.ectotherms", "Diet_Scavenger", 
              "Diet_Seed","Diet_Plant", "Activity_1Diurnal_2Nocturnal", "Litter_clutch_size",
@@ -26,10 +26,10 @@ def Imput_lessnoise_allsp_rates():
 # ===========================
 # Cargar y separar los datos
 # ===========================
-model, data = Imput_lessnoise_allsp_rates()
+model, data = Imput_lessnoise_mediansp_rates()
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # ===========================
 # Entrenamiento
