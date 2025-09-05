@@ -29,7 +29,7 @@ def Imput_lessnoise_mediansp_rates():
 model, data = Imput_lessnoise_mediansp_rates()
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.75, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
 
 # ===========================
 # Entrenamiento
