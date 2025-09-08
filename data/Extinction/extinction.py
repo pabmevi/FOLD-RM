@@ -70,8 +70,15 @@ print_class_distribution(test_data, "test")
 # Balancear y mostrar nueva distribución
 balanced_train_data = balance_data(train_data)
 balanced_test_data = balance_data(test_data)
+
 print_class_distribution(balanced_train_data, "train (balanceado)")
 print_class_distribution(balanced_test_data, "test (balanceado)")
+
+# Verificar clases en test balanceado antes de predecir
+labels_test = [row[-1] for row in balanced_test_data]
+print(f"\nConteo Threatened en test balanceado: {labels_test.count('Threatened')}")
+print(f"Conteo Not threatened en test balanceado: {labels_test.count('Not threatened')}")
+print(f"Conteo DD en test balanceado: {labels_test.count('DD')}")
 
 # ===========================
 
@@ -89,9 +96,16 @@ model.print_asp()
 # ===========================
 
 # ===========================
+
+# ===========================
 # Predicting over test_data balanceado
 # ===========================
 Y_pred = model.predict(balanced_test_data)
+
+# Mostrar las primeras 20 predicciones y clases reales
+print("\nPrimeras 20 predicciones (predicho vs real):")
+for i, (pred, obs) in enumerate(zip(Y_pred[:20], balanced_test_data[:20])):
+    print(f"{i+1}: pred = {pred}, real = {obs[-1]}")
 
 print("\nEjemplo de predicciones (primeros 10):")
 for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
@@ -118,7 +132,7 @@ else:
     print("\nNo hay predicciones válidas para calcular accuracy.")
 
 # Matriz de confusión
-labels = ['threatened', 'Not threatened', 'dd']
+labels = ['Threatened', 'Not threatened', 'DD']
 if pred_classes:
     cm = confusion_matrix(true_classes, pred_classes, labels=labels)
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
