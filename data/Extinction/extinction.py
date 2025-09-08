@@ -39,20 +39,43 @@ train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 # ===========================
 # Mostrar distribución de clases en train y test
 # ===========================
+
 def print_class_distribution(dataset, name):
     labels = [row[-1] for row in dataset]
     dist = pd.Series(labels).value_counts()
     print(f"\nDistribución de clases en {name}:")
     print(dist)
 
-print_class_distribution(train_data, "train")
+# ===========================
+# Balancear el conjunto de entrenamiento
+# ===========================
+def balance_train_data(train_data):
+    threatened = [row for row in train_data if row[-1] == 'Threatened']
+    not_threatened = [row for row in train_data if row[-1] == 'Not threatened']
+    dd = [row for row in train_data if row[-1] == 'DD']
+    n = len(threatened)
+    # Submuestreo aleatorio de Not threatened
+    random.seed(42)
+    not_threatened_sample = random.sample(not_threatened, n)
+    balanced = threatened + not_threatened_sample + dd
+    random.shuffle(balanced)
+    return balanced
+
+
+print_class_distribution(train_data, "train (original)")
 print_class_distribution(test_data, "test")
 
+# Balancear y mostrar nueva distribución
+balanced_train_data = balance_train_data(train_data)
+print_class_distribution(balanced_train_data, "train (balanceado)")
+
 # ===========================
-# Training (parámetros menos estrictos para mejorar cobertura)
+
 # ===========================
-model.fit(train_data, ratio=0.9)
-model.confidence_fit(train_data, improvement_threshold=0.9)
+# Training con datos balanceados
+# ===========================
+model.fit(balanced_train_data, ratio=0.9)
+model.confidence_fit(balanced_train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
