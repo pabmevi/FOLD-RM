@@ -17,7 +17,7 @@ def extinction():
           "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
           "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
 
-    model = Classifier(attrs=attrs, numeric=nums, label='status')
+    model = Classifier(attrs=attrs, numeric=nums, label='status_group')
     data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
     print('\n% traits dataset', np.shape(data))
     return model, data
@@ -45,6 +45,35 @@ print("\nEjemplo de predicciones (primeros 10):")
 for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
     print(f"Obs {i+1}: pred = {pred}, entrada = {obs}")
 
+# ===========================
+# Evaluación del modelo
+# ===========================
+# Accuracy global (cuenta None como error)
+all_pred_classes = [p[0] if p is not None else None for p in Y_pred]
+all_true_classes = [row[-1] for row in test_data]
+acc_global = sum([y1 == y2 for y1, y2 in zip(all_pred_classes, all_true_classes)]) / len(all_true_classes)
+print("\nAccuracy global (incluyendo None como error):", acc_global)
+
+# Extraer clases predichas y etiquetas reales, filtrando None
+pred_classes = [p[0] for p in Y_pred if p is not None and p[0] is not None]
+true_classes = [row[-1] for p, row in zip(Y_pred, test_data) if p is not None and p[0] is not None]
+
+# Accuracy general
+if pred_classes:
+    acc = accuracy_score(true_classes, pred_classes)
+    print("\nAccuracy general:", acc)
+else:
+    print("\nNo hay predicciones válidas para calcular accuracy.")
+
+# Matriz de confusión
+labels = ['threatened', 'Not threatened', 'dd']
+if pred_classes:
+    cm = confusion_matrix(true_classes, pred_classes, labels=labels)
+    df_cm = pd.DataFrame(cm, index=labels, columns=labels)
+    print("\nMatriz de confusión:")
+    print(df_cm)
+else:
+    print("\nNo hay predicciones válidas para matriz de confusión.")
 
 
 
