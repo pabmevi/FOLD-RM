@@ -1,9 +1,3 @@
-# Mostrar distribución de clases reales en test
-from collections import Counter
-test_labels = [row[-1] for row in test_data]
-print("\nDistribución de clases reales en test:")
-for label, count in Counter(test_labels).items():
-     print(f"{label}: {count}")
 import sys
 import random
 random.seed(42)
@@ -28,7 +22,15 @@ def extinction():
     print('\n% dataset', np.shape(data))
     return model, data
 
+
 model, data = extinction()
+
+# Mostrar distribución de clases en todo el dataset
+from collections import Counter
+all_labels = [row[-1] for row in data]
+print("\nDistribución de clases en todo el dataset:")
+for label, count in Counter(all_labels).items():
+     print(f"{label}: {count}")
 
 from utils import split_data
 train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
