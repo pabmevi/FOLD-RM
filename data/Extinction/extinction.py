@@ -8,37 +8,6 @@ from foldrm import Classifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pandas as pd
 
-def extinction():
-    attrs = ["IslandEndemic","Volancy","Mass","HWI","Habitat","Trophic.Level",
-          "Trophic.Niche","LAT","Beak.Length.culmen",
-          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
-          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
-    nums = ["Mass","HWI","LAT","Beak.Length.culmen",
-          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
-          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
-
-    model = Classifier(attrs=attrs, numeric=nums, label='status_group')
-    data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
-    print('\n% traits dataset', np.shape(data))
-    # Identificar registros con clases no válidas
-    valid_labels = {'Not threatened', 'Threatened', 'DD'}
-    invalid = [(i, row[-1]) for i, row in enumerate(data) if str(row[-1]).strip() not in valid_labels]
-    if invalid:
-        print(f"\nRegistros con status_group no válido ({len(invalid)} casos):")
-        for idx, val in invalid:
-            print(f"Índice {idx}: status_group = {val}")
-    filtered_data = [row for row in data if str(row[-1]).strip() in valid_labels]
-    print(f"\nFiltrados {len(data) - len(filtered_data)} registros con clases no válidas.")
-    return model, filtered_data
-
-model, data = extinction()
-
-from utils import split_data
-train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
-
-# ===========================
-# Mostrar distribución de clases en train y test
-# ===========================
 
 def print_class_distribution(dataset, name):
     labels = [row[-1] for row in dataset]
@@ -46,33 +15,42 @@ def print_class_distribution(dataset, name):
     print(f"\nDistribución de clases en {name}:")
     print(dist)
 
-# ===========================
-# Balancear el conjunto de entrenamiento
-# ===========================
-def balance_data(data):
-    threatened = [row for row in data if row[-1] == 'Threatened']
-    not_threatened = [row for row in data if row[-1] == 'Not threatened']
-    dd = [row for row in data if row[-1] == 'DD']
-    n = min(len(threatened), len(not_threatened))
-    # Submuestreo aleatorio de Not threatened y Threatened
-    random.seed(42)
-    not_threatened_sample = random.sample(not_threatened, n)
-    threatened_sample = random.sample(threatened, n)
-    balanced = threatened_sample + not_threatened_sample + dd
-    random.shuffle(balanced)
-    return balanced
+attrs = ["IslandEndemic","Volancy","Mass","HWI","Habitat","Trophic.Level",
+          "Trophic.Niche","LAT","Beak.Length.culmen",
+          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
+          "Wing_Length","Kipps.Distance","Secondary1","Tail.Length"]
+nums = ["Mass","HWI","LAT","Beak.Length.culmen",
+          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
+          "Wing_Length","Kipps.Distance","Secondary1","Tail_Length"]
 
+model = Classifier(attrs=attrs, numeric=nums, label='status_group')
+data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
+print('\n% traits dataset', np.shape(data))
+# Filtrar solo clases válidas
+valid_labels = {'Not threatened', 'Threatened', 'DD'}
+filtered_data = [row for row in data if str(row[-1]).strip() in valid_labels]
+print(f"\nFiltrados {len(data) - len(filtered_data)} registros con clases no válidas.")
 
-print_class_distribution(train_data, "train (original)")
+from utils import split_data
+train_data, test_data = split_data(filtered_data, ratio=0.9, shuffle=True)
+
+print_class_distribution(train_data, "train")
 print_class_distribution(test_data, "test")
 
+# Training con datos originales y parámetros bajos
+model.fit(train_data, ratio=0.2)
+model.confidence_fit(train_data, improvement_threshold=0.2)
 
-# Balancear y mostrar nueva distribución
-balanced_train_data = balance_data(train_data)
-balanced_test_data = balance_data(test_data)
+print("\nLearned Answer Set Program rules:\n")
+model.print_asp()
 
-print_class_distribution(balanced_train_data, "train (balanceado)")
-print_class_distribution(balanced_test_data, "test (balanceado)")
+# Predicting over test_data original
+Y_pred = model.predict(test_data)
+
+# Mostrar las primeras 20 predicciones y clases reales
+print("\nPrimeras 20 predicciones (predicho vs real):")
+for i, (pred, obs) in enumerate(zip(Y_pred[:20], test_data[:20])):
+    print(f"{i+1}: pred = {pred}, real = {obs[-1]}")
 
 # Verificar clases en test balanceado antes de predecir
 labels_test = [row[-1] for row in balanced_test_data]
