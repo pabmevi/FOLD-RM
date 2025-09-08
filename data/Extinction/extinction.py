@@ -8,82 +8,50 @@ from foldrm import Classifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import pandas as pd
 
+def extinction():
+    attrs = ["IslandEndemic","Volancy","Mass","HWI","Habitat","Trophic.Level",
+          "Trophic.Niche","LAT","Beak.Length.culmen",
+          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
+          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
+    nums = ["Mass","HWI","LAT","Beak.Length.culmen",
+          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
+          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
 
+    model = Classifier(attrs=attrs, numeric=nums, label='status_group')
+    data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
+    print('\n% traits dataset', np.shape(data))
+    return model, data
+
+model, data = extinction()
+
+from utils import split_data
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
+
+# ===========================
+# Mostrar distribución de clases en train y test
+# ===========================
 def print_class_distribution(dataset, name):
     labels = [row[-1] for row in dataset]
     dist = pd.Series(labels).value_counts()
     print(f"\nDistribución de clases en {name}:")
     print(dist)
 
-attrs = ["IslandEndemic","Volancy","Mass","HWI","Habitat","Trophic.Level",
-          "Trophic.Niche","LAT","Beak.Length.culmen",
-          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
-          "Wing_Length","Kipps.Distance","Secondary1","Tail.Length"]
-nums = ["Mass","HWI","LAT","Beak.Length.culmen",
-          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
-          "Wing_Length","Kipps.Distance","Secondary1","Tail_Length"]
-
-model = Classifier(attrs=attrs, numeric=nums, label='status_group')
-data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
-print('\n% traits dataset', np.shape(data))
-# Filtrar solo clases válidas
-valid_labels = {'Not threatened', 'Threatened', 'DD'}
-filtered_data = [row for row in data if str(row[-1]).strip() in valid_labels]
-print(f"\nFiltrados {len(data) - len(filtered_data)} registros con clases no válidas.")
-
-from utils import split_data
-train_data, test_data = split_data(filtered_data, ratio=0.9, shuffle=True)
-
 print_class_distribution(train_data, "train")
 print_class_distribution(test_data, "test")
 
-# Training con datos originales y parámetros bajos
-model.fit(train_data, ratio=0.2)
-model.confidence_fit(train_data, improvement_threshold=0.2)
+# ===========================
+# Training (parámetros menos estrictos para mejorar cobertura)
+# ===========================
+model.fit(train_data, ratio=0.9)
+model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
-# Predicting over test_data original
+# ===========================
+# Predicting over test_data
+# ===========================
 Y_pred = model.predict(test_data)
-
-# Mostrar las primeras 20 predicciones y clases reales
-print("\nPrimeras 20 predicciones (predicho vs real):")
-for i, (pred, obs) in enumerate(zip(Y_pred[:20], test_data[:20])):
-    print(f"{i+1}: pred = {pred}, real = {obs[-1]}")
-
-# Verificar clases en test balanceado antes de predecir
-labels_test = [row[-1] for row in balanced_test_data]
-print(f"\nConteo Threatened en test balanceado: {labels_test.count('Threatened')}")
-print(f"Conteo Not threatened en test balanceado: {labels_test.count('Not threatened')}")
-print(f"Conteo DD en test balanceado: {labels_test.count('DD')}")
-
-# ===========================
-
-# ===========================
-
-# ===========================
-# Training con datos balanceados y parámetros bajos
-# ===========================
-model.fit(balanced_train_data, ratio=0.2)
-model.confidence_fit(balanced_train_data, improvement_threshold=0.2)
-
-print("\nLearned Answer Set Program rules:\n")
-model.print_asp()
-
-# ===========================
-
-# ===========================
-
-# ===========================
-# Predicting over test_data balanceado
-# ===========================
-Y_pred = model.predict(balanced_test_data)
-
-# Mostrar las primeras 20 predicciones y clases reales
-print("\nPrimeras 20 predicciones (predicho vs real):")
-for i, (pred, obs) in enumerate(zip(Y_pred[:20], balanced_test_data[:20])):
-    print(f"{i+1}: pred = {pred}, real = {obs[-1]}")
 
 print("\nEjemplo de predicciones (primeros 10):")
 for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
@@ -110,7 +78,7 @@ else:
     print("\nNo hay predicciones válidas para calcular accuracy.")
 
 # Matriz de confusión
-labels = ['Threatened', 'Not threatened', 'DD']
+labels = ['threatened', 'Not threatened', 'dd']
 if pred_classes:
     cm = confusion_matrix(true_classes, pred_classes, labels=labels)
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
