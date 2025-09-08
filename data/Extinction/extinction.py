@@ -25,7 +25,7 @@ def extinction():
 model, data = extinction()
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # ===========================
 # Mostrar distribución de clases en train y test
@@ -43,7 +43,7 @@ print_class_distribution(test_data, "test")
 # Training (parámetros menos estrictos para mejorar cobertura)
 # ===========================
 model.fit(train_data, ratio=0.9)
-model.confidence_fit(train_data, improvement_threshold=0.1)
+model.confidence_fit(train_data, improvement_threshold=0.9)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
