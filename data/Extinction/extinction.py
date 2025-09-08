@@ -10,7 +10,7 @@ import pandas as pd
 
 def extinction():
     attrs = ["Mass","HWI","Habitat",
-         "Trophic.Niche","LAT","Beak.Length.culmen",
+         "LAT","Beak.Length.culmen",
          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
     nums = ["Mass","HWI","LAT","Beak.Length.culmen",
