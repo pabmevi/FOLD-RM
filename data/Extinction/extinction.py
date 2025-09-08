@@ -18,7 +18,7 @@ def extinction():
          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
 
     model = Classifier(attrs=attrs, numeric=nums, label='IslandEndemic')
-    data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/roadkill/BirdstraitsIUCN.csv')
+    data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
     print('\n% dataset', np.shape(data))
     return model, data
 
