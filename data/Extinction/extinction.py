@@ -41,9 +41,28 @@ model.print_asp()
 # ===========================
 Y_pred = model.predict(test_data)
 
+
 print("\nEjemplo de predicciones (primeros 10):")
 for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
-    print(f"Obs {i+1}: pred = {pred}, entrada = {obs}")
+     print(f"Obs {i+1}: pred = {pred}, entrada = {obs}")
+
+# ===========================
+# Matriz de confusión
+# ===========================
+# Extraer clases predichas y etiquetas reales, filtrando None
+pred_classes = [p[0] for p in Y_pred if p is not None and p[0] is not None]
+true_classes = [row[-1] for p, row in zip(Y_pred, test_data) if p is not None and p[0] is not None]
+
+# Obtener todas las categorías presentes en el test
+all_labels = sorted(list(set(true_classes + pred_classes)))
+
+if pred_classes:
+     cm = confusion_matrix(true_classes, pred_classes, labels=all_labels)
+     df_cm = pd.DataFrame(cm, index=all_labels, columns=all_labels)
+     print("\nMatriz de confusión:")
+     print(df_cm)
+else:
+     print("\nNo hay predicciones válidas para matriz de confusión.")
 
 
 
