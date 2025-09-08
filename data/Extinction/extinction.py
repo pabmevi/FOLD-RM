@@ -78,7 +78,7 @@ else:
     print("\nNo hay predicciones válidas para calcular accuracy.")
 
 # Matriz de confusión
-labels = ['threatened', 'Not threatened', 'dd']
+labels = ['Threatened', 'Not threatened', 'DD']
 if pred_classes:
     cm = confusion_matrix(true_classes, pred_classes, labels=labels)
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
