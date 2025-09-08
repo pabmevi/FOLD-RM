@@ -25,13 +25,25 @@ def extinction():
 model, data = extinction()
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.7, shuffle=True)
 
 # ===========================
-# Training
+# Mostrar distribución de clases en train y test
+# ===========================
+def print_class_distribution(dataset, name):
+    labels = [row[-1] for row in dataset]
+    dist = pd.Series(labels).value_counts()
+    print(f"\nDistribución de clases en {name}:")
+    print(dist)
+
+print_class_distribution(train_data, "train")
+print_class_distribution(test_data, "test")
+
+# ===========================
+# Training (parámetros menos estrictos para mejorar cobertura)
 # ===========================
 model.fit(train_data, ratio=0.9)
-model.confidence_fit(train_data, improvement_threshold=0.9)
+model.confidence_fit(train_data, improvement_threshold=0.1)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
