@@ -33,7 +33,7 @@ for label, count in Counter(all_labels).items():
      print(f"{label}: {count}")
 
 from utils import split_data
-train_data, test_data = split_data(data, ratio=0.8, shuffle=True)
+train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 
 # ===========================
 # Training
