@@ -49,15 +49,16 @@ def print_class_distribution(dataset, name):
 # ===========================
 # Balancear el conjunto de entrenamiento
 # ===========================
-def balance_train_data(train_data):
-    threatened = [row for row in train_data if row[-1] == 'Threatened']
-    not_threatened = [row for row in train_data if row[-1] == 'Not threatened']
-    dd = [row for row in train_data if row[-1] == 'DD']
-    n = len(threatened)
-    # Submuestreo aleatorio de Not threatened
+def balance_data(data):
+    threatened = [row for row in data if row[-1] == 'Threatened']
+    not_threatened = [row for row in data if row[-1] == 'Not threatened']
+    dd = [row for row in data if row[-1] == 'DD']
+    n = min(len(threatened), len(not_threatened))
+    # Submuestreo aleatorio de Not threatened y Threatened
     random.seed(42)
     not_threatened_sample = random.sample(not_threatened, n)
-    balanced = threatened + not_threatened_sample + dd
+    threatened_sample = random.sample(threatened, n)
+    balanced = threatened_sample + not_threatened_sample + dd
     random.shuffle(balanced)
     return balanced
 
@@ -65,25 +66,32 @@ def balance_train_data(train_data):
 print_class_distribution(train_data, "train (original)")
 print_class_distribution(test_data, "test")
 
+
 # Balancear y mostrar nueva distribución
-balanced_train_data = balance_train_data(train_data)
+balanced_train_data = balance_data(train_data)
+balanced_test_data = balance_data(test_data)
 print_class_distribution(balanced_train_data, "train (balanceado)")
+print_class_distribution(balanced_test_data, "test (balanceado)")
 
 # ===========================
 
 # ===========================
-# Training con datos balanceados
+
 # ===========================
-model.fit(balanced_train_data, ratio=0.9)
-model.confidence_fit(balanced_train_data, improvement_threshold=0.9)
+# Training con datos balanceados y parámetros bajos
+# ===========================
+model.fit(balanced_train_data, ratio=0.2)
+model.confidence_fit(balanced_train_data, improvement_threshold=0.2)
 
 print("\nLearned Answer Set Program rules:\n")
 model.print_asp()
 
 # ===========================
-# Predicting over test_data
+
 # ===========================
-Y_pred = model.predict(test_data)
+# Predicting over test_data balanceado
+# ===========================
+Y_pred = model.predict(balanced_test_data)
 
 print("\nEjemplo de predicciones (primeros 10):")
 for i, (pred, obs) in enumerate(zip(Y_pred[:10], test_data[:10])):
