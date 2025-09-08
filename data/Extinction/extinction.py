@@ -20,8 +20,13 @@ def extinction():
     model = Classifier(attrs=attrs, numeric=nums, label='status_group')
     data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
     print('\n% traits dataset', np.shape(data))
-    # Filtrar solo clases válidas
+    # Identificar registros con clases no válidas
     valid_labels = {'Not threatened', 'Threatened', 'DD'}
+    invalid = [(i, row[-1]) for i, row in enumerate(data) if str(row[-1]).strip() not in valid_labels]
+    if invalid:
+        print(f"\nRegistros con status_group no válido ({len(invalid)} casos):")
+        for idx, val in invalid:
+            print(f"Índice {idx}: status_group = {val}")
     filtered_data = [row for row in data if str(row[-1]).strip() in valid_labels]
     print(f"\nFiltrados {len(data) - len(filtered_data)} registros con clases no válidas.")
     return model, filtered_data
