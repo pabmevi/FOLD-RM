@@ -41,12 +41,8 @@ train_data, test_data = split_data(data, ratio=0.9, shuffle=True)
 model.fit(train_data, ratio=0.9)
 model.confidence_fit(train_data, improvement_threshold=0.9)
 
-
-# Mostrar solo reglas sin negaciones ni auxiliares
-print("\nReglas sin negaciones ni auxiliares:\n")
-for rule in model.asp_rules:
-     if 'not ' not in rule and 'ab' not in rule:
-          print(rule)
+print("\nLearned Answer Set Program rules:\n")
+model.print_asp()
 
 # ===========================
 # Predicting over test_data
