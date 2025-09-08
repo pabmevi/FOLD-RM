@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import pandas as pd
 
 def extinction():
-    attrs = ["Volancy","Mass","HWI","Habitat","Trophic.Level",
+    attrs = ["Mass","HWI","Habitat","Trophic.Level",
          "Trophic.Niche","LAT","Beak.Length.culmen",
          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
@@ -17,7 +17,7 @@ def extinction():
          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
 
-    model = Classifier(attrs=attrs, numeric=nums, label='IslandEndemic')
+    model = Classifier(attrs=attrs, numeric=nums, label='Volancy')
     data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
     print('\n% dataset', np.shape(data))
     return model, data
