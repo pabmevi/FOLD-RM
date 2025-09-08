@@ -34,13 +34,25 @@ nums = ["Mass","HWI","LAT","Beak.Length.culmen",
          "Beak.Length.nares","Beak.Width","Beak.Depth","Tarsus.Length",
          "Wing.Length","Kipps.Distance","Secondary1","Tail.Length"]
 
-model = Classifier(attrs=attrs, numeric=nums, label='status_group')
+model = Classifier(attrs=attrs, numeric=nums, label='status')
 data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
 print('\n% traits dataset', np.shape(data))
-# Filtrar solo clases válidas
 valid_labels = {'Not threatened', 'Threatened', 'DD'}
 filtered_data = [row for row in data if str(row[-1]).strip() in valid_labels]
 print(f"\nFiltrados {len(data) - len(filtered_data)} registros con clases no válidas.")
+
+# Usar 'status' como etiqueta
+model = Classifier(attrs=attrs, numeric=nums, label='status')
+data = model.load_data('/home/pabmevi/CONFOLD/FOLD-RM/data/Extinction/BirdstraitsIUCN.csv')
+print('\n% traits dataset', np.shape(data))
+
+# Obtener todas las categorías presentes en 'status'
+all_labels = sorted(list(set([str(row[-1]).strip() for row in data])))
+print(f"\nCategorías encontradas en status: {all_labels}")
+
+# Filtrar solo filas con valor no vacío en status
+filtered_data = [row for row in data if str(row[-1]).strip() != '' and str(row[-1]).strip() is not None]
+print(f"\nFiltrados {len(data) - len(filtered_data)} registros con status vacío.")
 
 from utils import split_data
 train_data, test_data = split_data(filtered_data, ratio=0.9, shuffle=True)
@@ -87,6 +99,16 @@ else:
 
 # Matriz de confusión
 labels = ['Threatened', 'Not threatened', 'DD']
+if pred_classes:
+    cm = confusion_matrix(true_classes, pred_classes, labels=labels)
+    df_cm = pd.DataFrame(cm, index=labels, columns=labels)
+    print("\nMatriz de confusión:")
+    print(df_cm)
+else:
+    print("\nNo hay predicciones válidas para matriz de confusión.")
+
+# Usar todas las categorías encontradas para la matriz de confusión
+labels = all_labels
 if pred_classes:
     cm = confusion_matrix(true_classes, pred_classes, labels=labels)
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
